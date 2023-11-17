@@ -1,0 +1,162 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <title>
+        Bouncing Ball!!
+    </title>
+    <style>
+        .startBtn {
+            top: 90%;
+            left: 30%;
+            background-color:#53BD33;
+            border-radius: 10%;
+            padding: 15px;
+            border:none;
+        }
+        canvas {
+            background-color: #F08080;
+            width: 600px;
+            height: 400px;
+            position: absolute;
+            top: 30%;
+            left: 30%;
+        }
+    </style>
+</head>
+<body>
+<center>
+    <h2>Bouncing Ball Game</h2>
+    <button id="start" class="startBtn" onclick="start()">Start</button>
+    <button id="stop" class="startBtn" onclick="stop()">Stop</button></br>
+    <h1 id="countdown"></h1>
+    <canvas id="canvas">
+    </canvas>
+    <script>
+        let canvas = document.getElementById("canvas");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let box = canvas.getContext('2d');
+
+        // Tạo thanh bar chuyển động
+        let rectWidth=200;
+        let rectHeight=20;
+        let rectX=650;
+        let rectY=650;
+        let rectSpeed=20;
+
+        // Tạo tọa độ ban đầu của quả bóng: x và y
+        // Tạo tốc độ của quả bóng: speedX và speedY
+        let x = 500;
+        let y = 300;
+        let speedX = 1;
+        let speedY = 1;
+        let radius = 20;
+        let acc=0.5;
+
+        // Tạo sự kiện bắt chuyển động của thanh bar
+        document.addEventListener('keydown', function(event) {
+            // Di chuyển hộp khi nhấn các phím mũi tên
+            switch(event.key) {
+                case 'ArrowLeft':
+                    rectX -= rectSpeed;
+                    break;
+                case 'ArrowRight':
+                    rectX += rectSpeed;
+                    break;
+            }
+
+            // Xóa canvas và vẽ lại thanh bar và quả bóng
+            box.clearRect(0, 0, innerWidth, innerHeight);
+            drawBar();
+            drawBall();
+        });
+
+        let gameOver = false;
+        let score=0;
+        let counter=0;
+        // Tạo vòng lặp cập nhật liên tục tọa độ của quả bóng và thanh bar
+        function move() {
+            requestAnimationFrame(move);
+            if (!gameOver) {
+                // Kiểm tra va chạm với cạnh của hộp
+                if (x + radius > innerWidth) speedX = - speedX;
+                if (x - radius < 0) speedX = - speedX;
+                if (y + radius > innerHeight) {
+                    speedY = - speedY;
+                    gameOver=true;
+                    alert("Score: "+score);
+                }
+                if (y - radius < 0) speedY = - speedY;
+
+                // Kiểm tra va chạm với thanh Bar
+                if (
+                    y - radius < rectY + rectHeight && y+radius > rectY &&
+                   (x -radius > rectX && x+radius < rectX + rectWidth)
+                ) {
+                    counter++;
+                    if (counter%3==0) {
+                        speedX+=acc;
+                        speedY+=acc;}
+                    speedY = - speedY;
+                    score +=10;
+                }
+
+                // Cập nhật tọa độ mới của quả bóng
+                x = x + speedX;
+                y = y + speedY;
+
+                // Xóa canvas và vẽ lại thanh bar và quả bóng
+                box.clearRect(0, 0, innerWidth, innerHeight);
+                drawBar();
+                drawBall();
+            }
+        }
+
+        function drawBar() {
+            box.fillStyle = 'blue';
+            box.fillRect(rectX, rectY, rectWidth, rectHeight);
+        }
+
+        function drawBall() {
+            box.beginPath();
+            box.fillStyle = 'red';
+            box.arc(x, y, radius, 0, Math.PI * 2);
+            box.fill();
+        }
+
+        function countdown() {
+            let countdownElement = document.getElementById('countdown');
+            let countdownTime=3;
+            function beginCountdown() {
+
+                // Thời gian còn lại
+                countdownElement.innerText = countdownTime;
+                countdownTime--;
+
+                // Đếm ngược
+                if (countdownTime < 0) {
+                    clearInterval(timer);
+                    countdownElement.innerText = 'START';
+                    setTimeout(function() {
+                        // Bắt đầu
+                        countdownElement.innerHTML ='';
+                        move();
+                    }, 2000);
+                }
+            }
+            // Gọi hàm đếm ngược theo giây
+            let timer = setInterval(beginCountdown, 1000);
+        }
+
+        function start() {
+            countdown();
+        }
+        function stop() {
+            gameOver=true;
+            alert("Score: " + score);
+        }
+    </script>
+</center>
+</body>
+</html>
